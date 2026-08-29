@@ -1,36 +1,114 @@
 import React from 'react';
-import { View, Text, Image, StyleSheet, TouchableOpacity } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { Product } from '../types/product';
+import {
+  View,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+} from 'react-native';
+
 interface ProductCardProps {
-  product: Product;
+  id: string;
+  name: string;
+  description: string;
+  image?: string;
+  price: number;
+  available: boolean;
+  category: string;
   onPress: () => void;
   onDelete: () => void;
 }
 
-export default function ProductCard({ product, onPress, onDelete }: ProductCardProps) {
+export default function ProductCard({
+  name,
+  description,
+  image,
+  price,
+  available,
+  category,
+  onPress,
+  onDelete,
+}: ProductCardProps) {
   return (
-    <TouchableOpacity style={styles.card} onPress={onPress} activeOpacity={0.9}>
-      <Image source={{ uri: product.image }} style={styles.image} />
-      
-      <View style={styles.infoContainer}>
+    <TouchableOpacity
+      style={styles.card}
+      onPress={onPress}
+      activeOpacity={0.9}
+    >
+      {image ? (
+        <Image
+          source={{ uri: image }}
+          style={styles.image}
+          resizeMode="cover"
+        />
+      ) : (
+        <View style={[styles.image, styles.imagePlaceholder]}>
+          <Text style={styles.placeholderText}>
+            Sin imagen
+          </Text>
+        </View>
+      )}
+
+      <View style={styles.content}>
         <View style={styles.headerRow}>
-          <Text style={styles.category}>{product.category.toUpperCase()}</Text>
-          <View style={[styles.badge, { backgroundColor: product.available ? '#E8F5E9' : '#FFEBEE' }]}>
-            <Text style={[styles.badgeText, { color: product.available ? '#2E7D32' : '#C62828' }]}>
-              {product.available ? 'Disponible' : 'Agotado'}
+          <Text style={styles.category}>
+            {category}
+          </Text>
+
+          <View
+            style={[
+              styles.badge,
+              {
+                backgroundColor: available
+                  ? '#E3EDE6'
+                  : '#F5EBE6',
+              },
+            ]}
+          >
+            <Text
+              style={[
+                styles.badgeText,
+                {
+                  color: available
+                    ? '#2C4A3E'
+                    : '#8C6D53',
+                },
+              ]}
+            >
+              {available ? 'Disponible' : 'Agotado'}
             </Text>
           </View>
         </View>
 
-        <Text style={styles.name} numberOfLines={1}>{product.name}</Text>
-        <Text style={styles.description} numberOfLines={2}>{product.description}</Text>
+        <Text
+          style={styles.name}
+          numberOfLines={1}
+        >
+          {name}
+        </Text>
 
-        <View style={styles.footerRow}>
-          <Text style={styles.price}>${product.price.toFixed(2)}</Text>
-          
-          <TouchableOpacity style={styles.deleteButton} onPress={onDelete}>
-            <Ionicons name="trash-outline" size={18} color="#D32F2F" />
+        <Text
+          style={styles.description}
+          numberOfLines={2}
+        >
+          {description}
+        </Text>
+
+        <View style={styles.footer}>
+          <Text style={styles.price}>
+            ${Number(price || 0).toFixed(2)}
+          </Text>
+
+          <TouchableOpacity
+            style={styles.deleteButton}
+            onPress={(e) => {
+              e.stopPropagation();
+              onDelete();
+            }}
+          >
+            <Text style={styles.deleteText}>
+              Eliminar
+            </Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -40,75 +118,108 @@ export default function ProductCard({ product, onPress, onDelete }: ProductCardP
 
 const styles = StyleSheet.create({
   card: {
-    flexDirection: 'row',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FDFBF7',
     borderRadius: 16,
-    marginBottom: 14,
-    padding: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 8,
-    elevation: 3,
+    marginBottom: 16,
+    overflow: 'hidden',
     borderWidth: 1,
-    borderColor: '#F0F0F0',
+    borderColor: '#EFECE6',
+    elevation: 2,
+    shadowColor: '#2C4A3E',
+    shadowOffset: {
+      width: 0,
+      height: 4,
+    },
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
   },
+
   image: {
-    width: 95,
-    height: 95,
-    borderRadius: 12,
-    backgroundColor: '#F5F5F5',
+    width: '100%',
+    height: 180,
+    backgroundColor: '#F5F2EB',
   },
-  infoContainer: {
-    flex: 1,
-    marginLeft: 12,
-    justifyContent: 'space-between',
+
+  imagePlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
+
+  placeholderText: {
+    fontSize: 14,
+    fontWeight: '600',
+    color: '#8C7A6B',
+  },
+
+  content: {
+    padding: 16,
+  },
+
   headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 6,
   },
+
   category: {
-    fontSize: 10,
-    fontWeight: '700',
-    color: '#7C3AED',
-    letterSpacing: 0.5,
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#8C7A6B',
+    textTransform: 'uppercase',
+    letterSpacing: 1,
   },
+
   badge: {
     paddingHorizontal: 8,
-    paddingVertical: 2,
+    paddingVertical: 3,
     borderRadius: 6,
   },
+
   badgeText: {
     fontSize: 10,
     fontWeight: '600',
   },
+
   name: {
-    fontSize: 15,
+    fontSize: 16,
     fontWeight: '700',
-    color: '#1F2937',
-    marginTop: 2,
+    color: '#2C3531',
+    marginBottom: 4,
   },
+
   description: {
-    fontSize: 12,
+    fontSize: 13,
     color: '#6B7280',
-    marginTop: 2,
+    lineHeight: 18,
+    marginBottom: 12,
   },
-  footerRow: {
+
+  footer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginTop: 6,
+    borderTopWidth: 1,
+    borderTopColor: '#F5F2EB',
+    paddingTop: 12,
   },
+
   price: {
-    fontSize: 16,
-    fontWeight: '800',
-    color: '#111827',
+    fontSize: 17,
+    fontWeight: '700',
+    color: '#2C4A3E',
   },
+
   deleteButton: {
-    backgroundColor: '#FFEBEE',
-    padding: 8,
-    borderRadius: 10,
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 6,
+    backgroundColor: '#F9F5F0',
+  },
+
+  deleteText: {
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#A36854',
   },
 });

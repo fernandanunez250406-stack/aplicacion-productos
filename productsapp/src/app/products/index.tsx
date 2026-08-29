@@ -1,38 +1,85 @@
 import React from 'react';
-import { View, Text, FlatList, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
+import {
+  View,
+  Text,
+  FlatList,
+  StyleSheet,
+  ScrollView,
+  TouchableOpacity,
+  SafeAreaView,
+} from 'react-native';
 import { useRouter } from 'expo-router';
 import { useProductsStore } from '../../store/productsStore';
 import ProductCard from '../components/ProductCard';
 
-const CATEGORIES = ['Todos', 'Electrónica', 'Ropa', 'Hogar', 'Deportes'];
-
 export default function ProductsScreen() {
   const router = useRouter();
-  const { products, selectedCategory, setCategory, deleteProduct } = useProductsStore();
 
-  const filteredProducts = selectedCategory === 'Todos'
-    ? products
-    : products.filter((p) => p.category === selectedCategory);
+  const {
+    products,
+    selectedCategory,
+    setSelectedCategory,
+    deleteProduct,
+  } = useProductsStore();
+
+  const categories = [
+    'Todos',
+    'Skincare',
+    'Cuidado Corporal',
+    'Hogar',
+  ];
+
+  const filteredProducts =
+    selectedCategory === 'Todos'
+      ? products
+      : products.filter(
+          (product) => product.category === selectedCategory
+        );
 
   return (
     <SafeAreaView style={styles.container}>
+      {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.title}>Catálogo</Text>
-        <Text style={styles.subtitle}>Explora nuestros productos disponibles</Text>
+        <Text style={styles.headerSubtitle}>
+          COLECCIÓN ESENCIAL
+        </Text>
+
+        <Text style={styles.headerTitle}>
+          Nuestros Productos
+        </Text>
       </View>
 
-      <View style={styles.categoriesWrapper}>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.categoriesContainer}>
-          {CATEGORIES.map((cat) => {
-            const isSelected = selectedCategory === cat;
+      {/* Categories */}
+      <View style={styles.categoriesContainer}>
+        <ScrollView
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.scrollCategories}
+        >
+          {categories.map((category) => {
+            const isSelected =
+              selectedCategory === category;
+
             return (
               <TouchableOpacity
-                key={cat}
-                style={[styles.categoryChip, isSelected && styles.categoryChipSelected]}
-                onPress={() => setCategory(cat)}
+                key={category}
+                style={[
+                  styles.categoryChip,
+                  isSelected && styles.categoryChipSelected,
+                ]}
+                onPress={() =>
+                  setSelectedCategory(category)
+                }
+                activeOpacity={0.8}
               >
-                <Text style={[styles.categoryText, isSelected && styles.categoryTextSelected]}>
-                  {cat}
+                <Text
+                  style={[
+                    styles.categoryText,
+                    isSelected &&
+                      styles.categoryTextSelected,
+                  ]}
+                >
+                  {category}
                 </Text>
               </TouchableOpacity>
             );
@@ -40,21 +87,32 @@ export default function ProductsScreen() {
         </ScrollView>
       </View>
 
+      {/* Products */}
       <FlatList
         data={filteredProducts}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => String(item.id)}
         renderItem={({ item }) => (
           <ProductCard
-            product={item}
-            onPress={() => router.push(`/products/${item.id}` as any)}
-            onDelete={() => deleteProduct(item.id)}
+            {...item}
+            onPress={() =>
+              router.push(`/products/${item.id}`)
+            }
+            onDelete={() =>
+              deleteProduct(item.id)
+            }
           />
         )}
         contentContainerStyle={styles.listContainer}
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>
-            <Text style={styles.emptyText}>No hay productos en esta categoría.</Text>
+            <Text style={styles.emptyTitle}>
+              No hay productos
+            </Text>
+
+            <Text style={styles.emptyText}>
+              No encontramos productos en esta categoría.
+            </Text>
           </View>
         }
       />
@@ -65,60 +123,86 @@ export default function ProductsScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#F9FAFB',
+    backgroundColor: '#F5F2EB',
   },
+
   header: {
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 8,
+    paddingTop: 20,
+    paddingBottom: 12,
   },
-  title: {
+
+  headerSubtitle: {
+    fontSize: 11,
+    fontWeight: '700',
+    color: '#8C7A6B',
+    letterSpacing: 1.5,
+    marginBottom: 4,
+  },
+
+  headerTitle: {
     fontSize: 26,
     fontWeight: '800',
-    color: '#111827',
+    color: '#2C3531',
   },
-  subtitle: {
-    fontSize: 13,
-    color: '#6B7280',
-    marginTop: 2,
-  },
-  categoriesWrapper: {
-    marginVertical: 12,
-  },
+
   categoriesContainer: {
-    paddingHorizontal: 20,
-    gap: 8,
+    marginBottom: 16,
   },
+
+  scrollCategories: {
+    paddingHorizontal: 20,
+  },
+
   categoryChip: {
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderRadius: 20,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#EFECE6',
+    marginRight: 8,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: '#E3DFD5',
   },
+
   categoryChipSelected: {
-    backgroundColor: '#7C3AED',
-    borderColor: '#7C3AED',
+    backgroundColor: '#2C4A3E',
+    borderColor: '#2C4A3E',
   },
+
   categoryText: {
     fontSize: 13,
     fontWeight: '600',
-    color: '#4B5563',
+    color: '#6B5E51',
   },
+
   categoryTextSelected: {
-    color: '#FFFFFF',
+    color: '#FDFBF7',
   },
+
   listContainer: {
     paddingHorizontal: 20,
-    paddingBottom: 20,
+    paddingBottom: 24,
+    flexGrow: 1,
   },
+
   emptyContainer: {
     alignItems: 'center',
-    marginTop: 60,
+    justifyContent: 'center',
+    paddingTop: 80,
+    paddingHorizontal: 30,
   },
+
+  emptyTitle: {
+    fontSize: 20,
+    fontWeight: '700',
+    color: '#2C3531',
+    marginBottom: 8,
+  },
+
   emptyText: {
     fontSize: 14,
-    color: '#9CA3AF',
+    color: '#8C7A6B',
+    textAlign: 'center',
+    lineHeight: 20,
   },
 });

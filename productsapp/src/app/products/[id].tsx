@@ -1,20 +1,18 @@
 import React from 'react';
 import { View, Text, Image, StyleSheet, ScrollView, TouchableOpacity, SafeAreaView } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { Ionicons } from '@expo/vector-icons';
 import { useProductsStore } from '../../store/productsStore';
 
 export default function ProductDetailScreen() {
-  const { id } = useLocalSearchParams<{ id: string }>();
+  const { id } = useLocalSearchParams();
   const router = useRouter();
-  const getProductById = useProductsStore((state) => state.getProductById);
+  const { products } = useProductsStore();
 
-  const product = getProductById(id);
+  const product = products.find((p) => p.id === id);
 
   if (!product) {
     return (
       <SafeAreaView style={styles.notFoundContainer}>
-        <Ionicons name="alert-circle-outline" size={48} color="#9CA3AF" />
         <Text style={styles.notFoundText}>Producto no encontrado</Text>
         <TouchableOpacity style={styles.backButtonSimple} onPress={() => router.back()}>
           <Text style={styles.backButtonText}>Regresar</Text>
@@ -26,19 +24,14 @@ export default function ProductDetailScreen() {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView showsVerticalScrollIndicator={false}>
-        <View style={styles.imageContainer}>
-          <Image source={{ uri: product.image }} style={styles.image} />
-          <TouchableOpacity style={styles.floatingBackButton} onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={20} color="#111827" />
-          </TouchableOpacity>
-        </View>
-
-        <View style={styles.contentContainer}>
+        <Image source={{ uri: product.image }} style={styles.image} />
+        
+        <View style={styles.detailsContainer}>
           <View style={styles.topRow}>
-            <Text style={styles.category}>{product.category.toUpperCase()}</Text>
-            <View style={[styles.badge, { backgroundColor: product.available ? '#E8F5E9' : '#FFEBEE' }]}>
-              <Text style={[styles.badgeText, { color: product.available ? '#2E7D32' : '#C62828' }]}>
-                {product.available ? 'Disponible en Stock' : 'Agotado temporalmente'}
+            <Text style={styles.category}>{product.category}</Text>
+            <View style={[styles.badge, { backgroundColor: product.available ? '#E3EDE6' : '#F5EBE6' }]}>
+              <Text style={[styles.badgeText, { color: product.available ? '#2C4A3E' : '#8C6D53' }]}>
+                {product.available ? 'En Stock' : 'Agotado'}
               </Text>
             </View>
           </View>
@@ -48,10 +41,16 @@ export default function ProductDetailScreen() {
 
           <View style={styles.divider} />
 
-          <Text style={styles.sectionTitle}>Descripción del Producto</Text>
+          <Text style={styles.sectionTitle}>Descripción</Text>
           <Text style={styles.description}>{product.description}</Text>
         </View>
       </ScrollView>
+
+      <View style={styles.footer}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Text style={styles.backButtonText}>Volver al listado</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 }
@@ -59,75 +58,59 @@ export default function ProductDetailScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  imageContainer: {
-    width: '100%',
-    height: 320,
-    backgroundColor: '#F3F4F6',
-    position: 'relative',
+    backgroundColor: '#F5F2EB',
   },
   image: {
     width: '100%',
-    height: '100%',
-    resizeMode: 'cover',
+    height: 320,
+    backgroundColor: '#EFECE6',
   },
-  floatingBackButton: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    backgroundColor: '#FFFFFF',
-    padding: 10,
-    borderRadius: 20,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    elevation: 3,
-  },
-  contentContainer: {
+  detailsContainer: {
     padding: 24,
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#FDFBF7',
+    borderTopLeftRadius: 28,
+    borderTopRightRadius: 28,
     marginTop: -24,
+    minHeight: 400,
   },
   topRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    marginBottom: 10,
   },
   category: {
-    fontSize: 11,
-    fontWeight: '700',
-    color: '#7C3AED',
-    letterSpacing: 0.8,
+    fontSize: 12,
+    fontWeight: '600',
+    color: '#8C7A6B',
+    textTransform: 'uppercase',
+    letterSpacing: 1.2,
   },
   badge: {
     paddingHorizontal: 10,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 6,
   },
   badgeText: {
     fontSize: 11,
     fontWeight: '600',
   },
   name: {
-    fontSize: 22,
+    fontSize: 24,
     fontWeight: '800',
-    color: '#111827',
-    marginTop: 8,
+    color: '#2C3531',
+    marginBottom: 8,
   },
   price: {
-    fontSize: 24,
-    fontWeight: '900',
-    color: '#7C3AED',
-    marginTop: 6,
+    fontSize: 22,
+    fontWeight: '700',
+    color: '#2C4A3E',
+    marginBottom: 16,
   },
   divider: {
     height: 1,
-    backgroundColor: '#F3F4F6',
-    marginVertical: 20,
+    backgroundColor: '#F5F2EB',
+    marginVertical: 16,
   },
   sectionTitle: {
     fontSize: 15,
@@ -144,22 +127,34 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    backgroundColor: '#FFFFFF',
+    backgroundColor: '#F5F2EB',
   },
   notFoundText: {
     fontSize: 16,
     color: '#6B7280',
-    marginTop: 12,
+    marginBottom: 12,
+  },
+  footer: {
+    padding: 20,
+    backgroundColor: '#FDFBF7',
+    borderTopWidth: 1,
+    borderTopColor: '#F5F2EB',
+  },
+  backButton: {
+    backgroundColor: '#2C4A3E',
+    paddingVertical: 14,
+    borderRadius: 14,
+    alignItems: 'center',
   },
   backButtonSimple: {
-    marginTop: 16,
+    backgroundColor: '#2C4A3E',
     paddingHorizontal: 20,
     paddingVertical: 10,
-    backgroundColor: '#7C3AED',
     borderRadius: 10,
   },
   backButtonText: {
-    color: '#FFFFFF',
+    color: '#FDFBF7',
+    fontSize: 15,
     fontWeight: '600',
   },
 });
